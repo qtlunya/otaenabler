@@ -8,7 +8,6 @@ finish() {
   echo "finish:${f}" >&${cydia[0]}
 }
 
-
 echo '[*] Removing beta profile configurations...'
 rm -f '/var/mobile/Library/Preferences/com.apple.MobileAsset.plist'
 rm -f '/var/Managed Preferences/mobile/com.apple.MobileAsset.plist'
