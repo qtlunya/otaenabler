@@ -1,0 +1,10 @@
+Package: net.cadoth.otaenabler
+Name: OTAEnabler
+Depends: file-cmds
+Version: 0.1.0
+Architecture: iphoneos-arm
+Description: Re-enable OTA software updates blocked by various methods
+Depiction: https://repo.cadoth.net/depictions/net.cadoth.otaenabler
+Maintainer: nyuszika7h <nyuszika7h@gmail.com>
+Author: nyuszika7h <nyuszika7h@gmail.com>
+Section: System

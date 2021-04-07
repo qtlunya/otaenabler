@@ -1,0 +1,36 @@
+#!/bin/bash
+
+finish() {
+  f="${1}"
+  [[ -z "${f}" || -z "${CYDIA}" ]] && return
+  cydia=(${CYDIA})
+  [[ ${cydia[1]} -eq 1 ]] || return
+  echo "finish:${f}" >&${cydia[0]}
+}
+
+
+echo '[*] Removing beta profile configurations...'
+rm -f '/var/mobile/Library/Preferences/com.apple.MobileAsset.plist'
+rm -f '/var/Managed Preferences/mobile/com.apple.MobileAsset.plist'
+
+echo '[*] Re-enabling OTA daemons...'
+for f in mobile.softwareupdated OTATaskingAgent softwareupdateservicesd; do
+  launchctl load -w /System/Library/LaunchDaemons/com.apple."$f".plist 2>&1 | grep -v 'service already loaded' >&2
+done
+
+echo '[*] Reverting changes made by unc0ver...'
+files=(
+  /var/MobileAsset/Assets/com_apple_MobileAsset_SoftwareUpdate
+  /var/MobileAsset/Assets/com_apple_MobileAsset_SoftwareUpdateDocumentation
+  /var/MobileAsset/AssetsV2/com_apple_MobileAsset_SoftwareUpdate
+  /var/MobileAsset/AssetsV2/com_apple_MobileAsset_SoftwareUpdateDocumentation
+  /var/MobileSoftwareUpdate/MobileAsset/AssetsV2
+)
+chflags -R noschg,nouchg,norestricted /var/MobileAsset /var/MobileSoftwareUpdate
+for f in "${files[@]}"; do
+  rm -rf "$f"
+  install -m 755 -o root -g wheel -d "$f"
+done
+
+echo 'Done! Please do an ldrestart or userspace reboot for the changes to take effect.'
+finish reboot
