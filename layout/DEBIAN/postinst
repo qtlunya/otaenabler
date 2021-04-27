@@ -18,6 +18,11 @@ for f in mobile.softwareupdated OTATaskingAgent softwareupdateservicesd; do
 done
 
 echo '[*] Reverting changes made by unc0ver...'
+if mount | grep -q /private/var/MobileSoftwareUpdate/mnt1/dev; then
+  echo '[-] KernBypass is installed. Please uninstall it and reboot, then reinstall OTAEnabler.' >&2
+  finish reboot
+  exit 0
+fi
 files=(
   /var/MobileAsset/Assets/com_apple_MobileAsset_SoftwareUpdate
   /var/MobileAsset/Assets/com_apple_MobileAsset_SoftwareUpdateDocumentation
