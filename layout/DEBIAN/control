@@ -5,7 +5,8 @@ Conflicts: com.apple.memecity, jp.akusio.kernbypass, jp.akusio.kernbypassbeta, j
 Version: 0.2.0
 Architecture: iphoneos-arm
 Description: Re-enable OTA software updates blocked by various methods
-Depiction: https://repo.cadoth.net/depictions/net.cadoth.otaenabler
+Depiction: https://repo.cadoth.net/depictions/net.cadoth.otaenabler.html
+SileoDepiction: https://repo.cadoth.net/sileo-depictions/net.cadoth.otaenabler.json
 Maintainer: nyuszika7h <nyuszika7h@gmail.com>
 Author: nyuszika7h <nyuszika7h@gmail.com>
 Section: System
