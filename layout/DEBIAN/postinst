@@ -1,5 +1,7 @@
 #!/bin/bash
 
+shopt -s nullglob
+
 finish() {
   f="${1}"
   [[ -z "${f}" || -z "${CYDIA}" ]] && return
@@ -21,6 +23,13 @@ for f in mobile.softwareupdated OTATaskingAgent softwareupdateservicesd; do
   launchctl unload "$f" 2>/dev/null
   launchctl load -w "$f" 2>&1 | grep -v 'service already loaded' >&2
 done
+
+echo '[*] Disabling unc0ver OTA blocker...'
+killall -9 cfprefsd unc0ver
+for f in /var/mobile/Containers/Data/Application/*/Library/Preferences/science.xnu.undecimus.plist; do
+  plutil -key DisableAutoUpdates -type bool -value false "$f"
+done
+killall -9 cfprefsd unc0ver
 
 echo '[*] Reverting changes made by unc0ver...'
 if mount | grep -q /private/var/MobileSoftwareUpdate/mnt1/dev; then
