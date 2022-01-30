@@ -24,6 +24,15 @@ for f in mobile.softwareupdated OTATaskingAgent softwareupdateservicesd; do
   launchctl load -w "$f" 2>&1 | grep -v 'service already loaded' >&2
 done
 
+echo '[*] Fixing up preboot...'
+boot_manifest_hash=$(ioreg -p IODeviceTree -l | awk -F'[<>]' '/boot-manifest-hash/ { print toupper($2) }')
+if [[ -e /private/preboot/active ]]; then
+    echo '/private/preboot/active already exists. Nothing to do.'
+else
+    echo "Writing $boot_manifest_hash to /private/preboot/active"
+    printf '%s' "$boot_manifest_hash" > /private/preboot/active  # No newline at the end is very important!
+fi
+
 echo '[*] Disabling unc0ver OTA blocker...'
 killall -9 cfprefsd unc0ver
 for f in /var/mobile/Containers/Data/Application/*/Library/Preferences/science.xnu.undecimus.plist; do

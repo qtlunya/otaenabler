@@ -1,6 +1,6 @@
 Package: net.cadoth.otaenabler
 Name: OTAEnabler
-Depends: com.bingner.plutil, file-cmds
+Depends: bash, com.bingner.plutil, file-cmds, gawk
 Conflicts: com.apple.memecity, jp.akusio.kernbypass, jp.akusio.kernbypassbeta, jp.akusio.kernbypass-unofficial
 Version: 0.3.0
 Architecture: iphoneos-arm
