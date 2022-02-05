@@ -30,7 +30,9 @@ if [[ "$(cat /private/preboot/active 2>/dev/null)" == "$boot_manifest_hash" ]]; 
     echo '/private/preboot/active already exists and has the correct contents. Nothing to do.'
 else
     echo "Writing $boot_manifest_hash to /private/preboot/active"
+    mount -u -w /private/preboot  # Remount read-write
     printf '%s' "$boot_manifest_hash" > /private/preboot/active  # No newline at the end is very important!
+    umount -f /private/preboot && mount /private/preboot  # Remount read-only (mount -u -r seems to fail)
 fi
 
 echo '[*] Disabling unc0ver OTA blocker...'
