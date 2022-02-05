@@ -26,8 +26,8 @@ done
 
 echo '[*] Fixing up preboot...'
 boot_manifest_hash=$(ioreg -p IODeviceTree -l | awk -F'[<>]' '/boot-manifest-hash/ { print toupper($2) }')
-if [[ -e /private/preboot/active ]]; then
-    echo '/private/preboot/active already exists. Nothing to do.'
+if [[ "$(cat /private/preboot/active 2>/dev/null)" == "$boot_manifest_hash" ]]; then
+    echo '/private/preboot/active already exists and has the correct contents. Nothing to do.'
 else
     echo "Writing $boot_manifest_hash to /private/preboot/active"
     printf '%s' "$boot_manifest_hash" > /private/preboot/active  # No newline at the end is very important!
