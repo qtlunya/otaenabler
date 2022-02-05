@@ -34,11 +34,11 @@ else
 fi
 
 echo '[*] Disabling unc0ver OTA blocker...'
-killall -9 cfprefsd unc0ver
+killall -9 cfprefsd unc0ver 2>/dev/null
 for f in /var/mobile/Containers/Data/Application/*/Library/Preferences/science.xnu.undecimus.plist; do
   plutil -key DisableAutoUpdates -type bool -value false "$f"
 done
-killall -9 cfprefsd unc0ver
+killall -9 cfprefsd unc0ver 2>/dev/null
 
 echo '[*] Reverting changes made by unc0ver...'
 if mount | grep -q /private/var/MobileSoftwareUpdate/mnt1/dev; then
