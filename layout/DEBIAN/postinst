@@ -1,13 +1,15 @@
-#!/bin/bash
-
-shopt -s nullglob
+#!/bin/sh
 
 finish() {
-  f="${1}"
-  [[ -z "${f}" || -z "${CYDIA}" ]] && return
-  cydia=(${CYDIA})
-  [[ ${cydia[1]} -eq 1 ]] || return
-  echo "finish:${f}" >&${cydia[0]}
+  if [ -z "$1" ] || [ -z "$CYDIA" ]; then
+    return
+  fi
+  read -r fd ver <<EOF
+$CYDIA
+EOF
+  [ "$ver" -eq 1 ] || return
+  # shellcheck disable=SC3021
+  echo "finish:$1" >&"$fd"
 }
 
 echo '[*] Removing beta profile configurations...'
@@ -17,7 +19,7 @@ rm -f '/var/Managed Preferences/mobile/com.apple.MobileAsset.plist'
 echo '[*] Re-enabling OTA daemons...'
 for f in mobile.softwareupdated OTATaskingAgent softwareupdateservicesd; do
   f="/System/Library/LaunchDaemons/com.apple.$f.plist"
-  if [[ ! -f "$f" ]] && [[ -f "${f%.plist}.disabled" ]]; then
+  if ! [ -f "$f" ] && [ -f "${f%.plist}.disabled" ]; then
     mv "${f%.plist}.disabled" "$f"
   fi
   launchctl unload "$f" 2>/dev/null
@@ -26,7 +28,7 @@ done
 
 echo '[*] Fixing up preboot...'
 boot_manifest_hash=$(ioreg -p IODeviceTree -l | awk -F'[<>]' '/boot-manifest-hash/ { print toupper($2) }')
-if [[ "$(cat /private/preboot/active 2>/dev/null)" == "$boot_manifest_hash" ]]; then
+if [ "$(cat /private/preboot/active 2>/dev/null)" = "$boot_manifest_hash" ]; then
     echo '/private/preboot/active already exists and has the correct contents. Nothing to do.'
 else
     echo "Writing $boot_manifest_hash to /private/preboot/active"
@@ -38,6 +40,9 @@ fi
 echo '[*] Disabling unc0ver OTA blocker...'
 killall -9 cfprefsd unc0ver 2>/dev/null
 for f in /var/mobile/Containers/Data/Application/*/Library/Preferences/science.xnu.undecimus.plist; do
+  case "$f" in
+    *'*'*) continue
+  esac
   plutil -key DisableAutoUpdates -type bool -value false "$f"
 done
 killall -9 cfprefsd unc0ver 2>/dev/null
@@ -48,15 +53,13 @@ if mount | grep -q /private/var/MobileSoftwareUpdate/mnt1/dev; then
   finish reboot
   exit 0
 fi
-files=(
-  /var/MobileAsset/Assets/com_apple_MobileAsset_SoftwareUpdate
-  /var/MobileAsset/Assets/com_apple_MobileAsset_SoftwareUpdateDocumentation
-  /var/MobileAsset/AssetsV2/com_apple_MobileAsset_SoftwareUpdate
-  /var/MobileAsset/AssetsV2/com_apple_MobileAsset_SoftwareUpdateDocumentation
-  /var/MobileSoftwareUpdate/MobileAsset/AssetsV2
-)
 chflags -R noschg,nouchg,norestricted /var/MobileAsset /var/MobileSoftwareUpdate
-for f in "${files[@]}"; do
+for f in /var/MobileAsset/Assets/com_apple_MobileAsset_SoftwareUpdate \
+         /var/MobileAsset/Assets/com_apple_MobileAsset_SoftwareUpdateDocumentation \
+         /var/MobileAsset/AssetsV2/com_apple_MobileAsset_SoftwareUpdate \
+         /var/MobileAsset/AssetsV2/com_apple_MobileAsset_SoftwareUpdateDocumentation \
+         /var/MobileSoftwareUpdate/MobileAsset/AssetsV2
+do
   rm -rf "$f"
   install -m 755 -o root -g wheel -d "$f"
 done
