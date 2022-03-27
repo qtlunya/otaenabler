@@ -64,5 +64,5 @@ do
   install -m 755 -o root -g wheel -d "$f"
 done
 
-echo 'Done! Please do an ldrestart or userspace reboot for the changes to take effect.'
+echo 'Done! Please do a (userspace) reboot for the changes to take effect.'
 finish reboot
