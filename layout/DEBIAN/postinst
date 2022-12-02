@@ -1,15 +1,14 @@
 #!/bin/sh
-
 finish() {
-  if [ -z "$1" ] || [ -z "$CYDIA" ]; then
-    return
-  fi
-  read -r fd ver <<EOF
+	if [ -z "$1" ] || [ -z "$CYDIA" ]; then
+		return
+	fi
+	read -r fd ver <<EOF
 $CYDIA
 EOF
-  [ "$ver" -eq 1 ] || return
-  # shellcheck disable=SC3021
-  echo "finish:$1" >&"$fd"
+	[ "$ver" -eq 1 ] || return
+	# shellcheck disable=SC3021
+	echo "finish:$1" >&"$fd"
 }
 
 echo '[*] Removing beta profile configurations...'
@@ -18,40 +17,40 @@ rm -f '/var/Managed Preferences/mobile/com.apple.MobileAsset.plist'
 
 echo '[*] Re-enabling OTA daemons...'
 for f in mobile.softwareupdated OTATaskingAgent softwareupdateservicesd; do
-  f="/System/Library/LaunchDaemons/com.apple.$f.plist"
-  if ! [ -f "$f" ] && [ -f "${f%.plist}.disabled" ]; then
-    mv "${f%.plist}.disabled" "$f"
-  fi
-  launchctl unload "$f" 2>/dev/null
-  launchctl load -w "$f" 2>&1 | grep -v 'service already loaded' >&2
+	f="/System/Library/LaunchDaemons/com.apple.$f.plist"
+	if ! [ -f "$f" ] && [ -f "${f%.plist}.disabled" ]; then
+		mv "${f%.plist}.disabled" "$f"
+	fi
+	launchctl unload "$f" 2>/dev/null
+	launchctl load -w "$f" 2>&1 | grep -v 'service already loaded' >&2
 done
 
 echo '[*] Fixing up preboot...'
 boot_manifest_hash=$(ioreg -p IODeviceTree -l | awk -F'[<>]' '/boot-manifest-hash/ { print toupper($2) }')
 if [ "$(cat /private/preboot/active 2>/dev/null)" = "$boot_manifest_hash" ]; then
-    echo '/private/preboot/active already exists and has the correct contents. Nothing to do.'
+	echo '/private/preboot/active already exists and has the correct contents. Nothing to do.'
 else
-    echo "Writing $boot_manifest_hash to /private/preboot/active"
-    mount -u -w /private/preboot  # Remount read-write
-    printf '%s' "$boot_manifest_hash" > /private/preboot/active  # No newline at the end is very important!
-    umount -f /private/preboot && mount /private/preboot  # Remount read-only (mount -u -r seems to fail)
+	echo "Writing $boot_manifest_hash to /private/preboot/active"
+	mount -u -w /private/preboot  # Remount read-write
+	printf '%s' "$boot_manifest_hash" > /private/preboot/active  # No newline at the end is very important!
+	umount -f /private/preboot && mount /private/preboot  # Remount read-only (mount -u -r seems to fail)
 fi
 
 echo '[*] Disabling unc0ver OTA blocker...'
 killall -9 cfprefsd unc0ver 2>/dev/null
 for f in /var/mobile/Containers/Data/Application/*/Library/Preferences/science.xnu.undecimus.plist; do
-  case "$f" in
-    *'*'*) continue
-  esac
-  plutil -key DisableAutoUpdates -type bool -value false "$f"
+	case "$f" in
+		*'*'*) continue
+	esac
+	plutil -key DisableAutoUpdates -type bool -value false "$f"
 done
 killall -9 cfprefsd unc0ver 2>/dev/null
 
 echo '[*] Reverting changes made by unc0ver...'
 if mount | grep -q /private/var/MobileSoftwareUpdate/mnt1/dev; then
-  echo '[-] KernBypass is installed. Please uninstall it and reboot, then reinstall OTAEnabler.' >&2
-  finish reboot
-  exit 0
+	echo '[-] KernBypass is installed. Please uninstall it and reboot, then reinstall OTAEnabler.' >&2
+	finish reboot
+	exit 0
 fi
 chflags -R noschg,nouchg,norestricted /var/MobileAsset /var/MobileSoftwareUpdate
 for f in /var/MobileAsset/Assets/com_apple_MobileAsset_SoftwareUpdate \
@@ -60,9 +59,9 @@ for f in /var/MobileAsset/Assets/com_apple_MobileAsset_SoftwareUpdate \
          /var/MobileAsset/AssetsV2/com_apple_MobileAsset_SoftwareUpdateDocumentation \
          /var/MobileSoftwareUpdate/MobileAsset/AssetsV2
 do
-  rm -rf "$f"
-  install -m 755 -o root -g wheel -d "$f"
+	rm -rf "$f"
+	install -m 755 -o root -g wheel -d "$f"
+	install -m 755 -o root -g wheel -d "$f"
 done
-
 echo 'Done! Please do a (userspace) reboot for the changes to take effect.'
 finish reboot
