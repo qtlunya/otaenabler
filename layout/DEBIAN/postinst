@@ -7,7 +7,7 @@ finish() {
 $CYDIA
 EOF
 	[ "$ver" -eq 1 ] || return
-	# shellcheck disable=SC3021
+	# shellcheck disable=SC2039,SC3021
 	echo "finish:$1" >&"$fd"
 }
 
