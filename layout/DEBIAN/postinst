@@ -27,7 +27,9 @@ done
 
 echo '[*] Fixing up preboot...'
 boot_manifest_hash=$(ioreg -p IODeviceTree -l | awk -F'[<>]' '/boot-manifest-hash/ { print toupper($2) }')
-if [ "$(cat /private/preboot/active 2>/dev/null)" = "$boot_manifest_hash" ]; then
+if [ -z "$boot_manifest_hash" ]; then
+	echo 'Failed to get boot manifest hash, not touching preboot.'
+elif [ "$(cat /private/preboot/active 2>/dev/null)" = "$boot_manifest_hash" ]; then
 	echo '/private/preboot/active already exists and has the correct contents. Nothing to do.'
 else
 	echo "Writing $boot_manifest_hash to /private/preboot/active"
