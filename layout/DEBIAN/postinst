@@ -1,4 +1,5 @@
 #!/bin/sh
+
 finish() {
 	if [ -z "$1" ] || [ -z "$CYDIA" ]; then
 		return
