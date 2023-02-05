@@ -19,9 +19,6 @@ rm -f '/var/Managed Preferences/mobile/com.apple.MobileAsset.plist'
 echo '[*] Re-enabling OTA daemons...'
 for f in mobile.softwareupdated OTATaskingAgent softwareupdateservicesd; do
 	f="/System/Library/LaunchDaemons/com.apple.$f.plist"
-	if ! [ -f "$f" ] && [ -f "${f%.plist}.disabled" ]; then
-		mv "${f%.plist}.disabled" "$f"
-	fi
 	launchctl unload "$f" 2>/dev/null
 	launchctl load -w "$f" 2>&1 | grep -v 'service already loaded' >&2
 done
