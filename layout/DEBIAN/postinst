@@ -12,13 +12,27 @@ EOF
     echo "finish:$1" >&"$fd"
 }
 
+case $(dpkg --print-architecture) in
+    iphoneos-arm)
+        root=/
+        ;;
+    iphoneos-arm64)
+        root=/var/jb/
+        ;;
+    *)
+        echo '[!] Not running on iOS. Aborting.'
+        exit 1
+        ;;
+esac
+
+
 echo '[*] Removing beta profile configurations...'
 rm -f '/var/mobile/Library/Preferences/com.apple.MobileAsset.plist'
 rm -f '/var/Managed Preferences/mobile/com.apple.MobileAsset.plist'
 
 echo '[*] Re-enabling OTA daemons...'
 for f in mobile.softwareupdated OTATaskingAgent softwareupdateservicesd; do
-    f="/System/Library/LaunchDaemons/com.apple.$f.plist"
+    f="${root}System/Library/LaunchDaemons/com.apple.$f.plist"
     if ! [ -f "$f" ] && [ -f "${f%.plist}.disabled" ]; then
         mv "${f%.plist}.disabled" "$f"
     fi
